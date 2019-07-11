@@ -1,0 +1,20 @@
+@Test
+Feature: Login to Sa and get Control and report Type
+
+  Background: : User Authenticates Post request
+    Given a user authenticates with correct password
+
+  Scenario:
+    When user get the controls data
+    Then the status code is 200 and validate the response
+
+  Scenario: Get  report request
+    When user get the  report type
+    Then the status code is 200 and validate the response
+
+
+
+
+
+
+

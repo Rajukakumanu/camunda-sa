@@ -1,0 +1,56 @@
+Git process to stash changes:
+
+git stash save "blah my changes"
+git stash list
+git branch
+create remote branch
+check out to ther branch
+pull from new remote branch
+git stash list
+git stash apply stash@{0}
+git add
+git commit
+git push to remote branch
+
+
+
+Git project Cheocuk to Statsh for first time:
+
+1. create project in stash
+2.clone the project to local
+3. create branch in bitbucket
+4. swith to new branch in git bash
+5. make some changes and commit the changes  git commit -am"commit"
+6. git push origin <New Branch>
+
+
+
+git steps:
+
+1. Create branch from Jira
+2. git fetch      .... should see branch beinh fetched from server
+3. git checkout <branch>
+4. Make changes and commit
+5. git push origin <branch>
+6. create PR
+7. if there is a conflict
+7a. git pull origin master
+7b. git merge origin master
+7c. manually resolve any conflicts
+7d. commit --all -m "merge from master"
+7e. git push
+7f. recreate PR (step 6)
+
+
+element dependency cannot have a charecter[children],because the type's content type is element only
+
+
+Things to do before leaving:
+
+1. get the APi project on cucumber
+2. Learn Enum to implement
+3. findout lIst DTO set values
+4. find out CI/CD build process
+
+
+
