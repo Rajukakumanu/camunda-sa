@@ -32,6 +32,25 @@ This is to create chrome profile in ur local to run the download attachment
 5.Open chrome/settings/advanced and select download path to above
 
 
+Headless Browser code:
+
+ @BeforeSuite
+    public void beforeSuite() {
+        System.setProperty("headless", "false"); // You can set this property elsewhere
+        String headless = System.getProperty("headless");
+
+        ChromeDriverManager.chromedriver();
+        if("true".equals(headless)) {
+            ChromeOptions chromeOptions = new ChromeOptions();
+            chromeOptions.addArguments("--headless");
+            driver = new ChromeDriver(chromeOptions);
+        } else {
+            driver = new ChromeDriver();
+        }
+    }
+
+
+
 
 
 
