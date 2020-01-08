@@ -1,0 +1,131 @@
+API tests demo:
+
+public class AuthUtil {
+
+    public static Cookie getJSessionCookie(String username, String password, String domain) {
+        Map<String, String> loginBody = new HashMap<>();
+
+        loginBody.put("domain", domain);
+        loginBody.put("username", username);
+        loginBody.put("password", password);
+
+        ExtractableResponse<Response> loginResponse = given().contentType(JSON)
+                .body(loginBody)
+                .when()
+                .post("/domain/auth/login/default/domain")
+                .then()
+                .log().all()
+                .statusCode(200)
+                .extract();
+
+        return loginResponse.detailedCookie("JSESSIONID");
+    }
+
+}
+
+tes for Post and get sceanrio:
+
+ @Test
+    public void write_and_read_back() {
+        Map<String, String> breach = minimalBreach();
+        String submitter = breach.get(SUBMITTER_RACF.getValue());
+        String id = given().contentType(JSON)
+                .body(breach)
+                .when()
+                .post("/api/breach")
+                .then()
+                .statusCode(201)
+                .extract().jsonPath("id");
+        Cookie auth = initiateAuthSession("user_with_all_teams_and_roles", "password", "EUROPA");
+        given().cookie(auth)
+                .when()
+                .get("/api/breach/" + id)
+                .then()
+                .statusCode(200)
+                .body(SUBMITTER_RACF.getValue(), equalTo(submitter))
+                .body(BREACH_PRIORITY.getValue(), equalTo(FieldValues.P1.getValue()));
+   
+Post and Get with asser Equals:
+ @Test
+    public void testBreachViewByPrivacyLegal() {
+        Map<String, String> breach = minimalBreach();
+        Cookie user = initiateAuthSession("user1", "password", "EUROPA");
+        ExtractableResponse<Response> response = given().contentType(JSON)
+                .body(breach)
+                .when()
+                .post("/api/breach")
+                .then()
+                .statusCode(201)
+                .extract();
+
+        String id = response.path("id");
+
+        Map<String, String> results = given().cookie(user)
+                .when()
+                .get("/api/breach/" + id)
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .get();
+
+        assertEquals(results.get("id"), id);
+        assertEquals(results.get(BREACH_PRIORITY.getValue()), FieldValues.P1.getValue());
+    }
+
+For PUt case:
+
+@Test
+    //Test conditions- role=PO , breach_priority=p5 ,assigned_group=rbsi_pc , caused_by_franchise=rbsi and caused_by_business_area1 = customer_experience ,
+    //user teams= teal_po, teal_pc, natwest_markets_po
+    //i.e. P5 Breach submitter_franchise team teal_po not matched with anyone of user's team
+    public void test_p5_breach_view_by_PO_when_caused_by_franchise_Matched() {
+        Map<String, String> breach = minimalBreach();
+        // set data to calculate low risk score for setting priority as P5
+        breach.put(BREACH_CATEGORY.getValue(), FieldValues.INTEGRITY.getValue());
+        breach.put(IMPACTED_INDIVIDUALS.getValue(), FieldValues.ONE.getValue());
+        breach.put(IMPACTED_RECORDS.getValue(), FieldValues.ONE.getValue());
+        breach.put(BREACH_SUBCATEGORY.getValue(), FieldValues.INCORRECT_FILE_UPLOADED.getValue());
+        breach.put(COMPROMISED_DATA.getValue(), FieldValues.COMPROMISED_AGE_DOB.getValue());
+
+        breach.put(CAUSED_BY_FRANCHISE.getValue(), FieldValues.TEAL.getValue());
+
+        Cookie user = initiateAuthSession("user3", "password", "EUROPA");
+        ExtractableResponse<Response> response = given().contentType(JSON)
+                .body(breach)
+                .when()
+                .post("/api/breach")
+                .then()
+                .statusCode(201)
+                .extract();
+
+        String id = response.path("id");
+
+        Map<String, String> results = given().cookie(user).contentType(JSON)
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .when()
+                .get("/api/breach/" + id)
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .get();
+
+        assertEquals(results.get("id"), id);
+        assertEquals(results.get(BREACH_PRIORITY.getValue()), FieldValues.P5.getValue());
+
+    }
+
+
+Invlaid User:
+
+ @Ignore // Failing test gets 500 instead of 404
+    public void return_404_on_invalidUser() {
+        String userId = "XYZ";
+
+        given().contentType("application/json")
+                .when().get("/api/racf/"+userId)
+                .then().statusCode(HttpStatus.SC_NOT_FOUND).and().statusLine("HTTP/1.1 404 ")
+                .log().body()
+                .extract().response();
+    }
